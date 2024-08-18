@@ -11,9 +11,9 @@ def connect_db():
 def init_db():
     with connect_db() as conn:
         cursor = conn.cursor()
-        cursor.execute("""CREATE TABLE IF NOT EXISTS users(
+        cursor.execute(f"""CREATE TABLE IF NOT EXISTS users(
                        id INTEGER PRIMARY KEY,
-                       balance INTEGER DEFAULT 1000,
+                       balance INTEGER DEFAULT {config.WELCOME_BONUS},
                        referrals INTEGER DEFAULT 0,
                        referrer INTEGER,
                        wallet TEXT DEFAULT 'не подключен',

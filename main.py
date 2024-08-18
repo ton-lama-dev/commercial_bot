@@ -115,20 +115,23 @@ def callback_set_language(call: types.CallbackQuery):
     user_id = call.from_user.id
     language = call.data[-2:]
     referrer = None
-    if user_id in referrers:
-        referrer_candidate = referrers[user_id]
-        if database.is_user_in_db(user_id=referrer_candidate):
-            if not referrer_candidate == user_id:
-                referrer = referrer_candidate
-                send_reward_to_referrer(referrer_id=referrer)
-                database.increase_referrals(user_id=referrer)
-    if referrer != None:
-        database.add_user_into_db(user_id=user_id, language=language, referrer=referrer)
+    if not database.is_user_in_db(user_id=user_id):
+        if user_id in referrers:
+            referrer_candidate = referrers[user_id]
+            if database.is_user_in_db(user_id=referrer_candidate):
+                if not referrer_candidate == user_id:
+                    referrer = referrer_candidate
+                    send_reward_to_referrer(referrer_id=referrer)
+                    database.increase_referrals(user_id=referrer)
+        if referrer != None:
+            database.add_user_into_db(user_id=user_id, language=language, referrer=referrer)
+        else:
+            database.add_user_into_db(user_id=user_id, language=language)
+        ru_text = f"Вам начислен приветственный бонус в размере {config.WELCOME_BONUS} $NEMR"
+        en_text = f"You got a welcome bonus of {config.WELCOME_BONUS} $NEMR"
+        send_message_by_language(user_id=user_id, ru_message=ru_text, en_message=en_text)
     else:
-        database.add_user_into_db(user_id=user_id, language=language)
-    ru_text = "Вам начислен приветственный бонус в размере 1000 $NEMR"
-    en_text = "You got a welcome bonus of 1000 $NEMR"
-    send_message_by_language(user_id=user_id, ru_message=ru_text, en_message=en_text)
+        database.users_set(user_id=user_id, item="language", value=language)
     if not is_subscribed_default(user_id=user_id):
         ask_to_subscribe(user_id=user_id)
         return
